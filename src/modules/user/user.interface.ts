@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 export enum Role {
   ADMIN = "ADMIN",
   SENDER = "SENDER",
-  RECIEVER = "RECIEVER",
+  RECEIVER = "RECEIVER",
 }
 
 export interface IAuthProvider {
@@ -25,9 +25,9 @@ export interface Iuser {
   phone?: string;
   picture?: string;
   adress?: string;
-  isDeleted?: string;
+  isDeleted?: boolean;
   isActive?: IsActive;
-  isVerified?: string;
+  isVerified?: boolean;
   role: Role;
   auths: IAuthProvider[];
   // this authprovider might be multiple, from googgle, gmail login

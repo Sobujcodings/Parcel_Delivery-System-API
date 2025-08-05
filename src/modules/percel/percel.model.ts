@@ -17,16 +17,19 @@ export const statuslogs = new Schema<trackingEvents>(
 export const percelSchema = new Schema<Ipercel>(
   {
     trackingId: { type: String },
-
-    phone: { type: String, required: true },
-    email: { type: String, required: true },
-
-    sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    // receiver: { type: Schema.Types.ObjectId, ref: "user", required: true },
-
+    // sender mail, receiver mail padhabo --> response e padhabo senderIn, receiverId from token -> s
+    // ender r mail diye db theke data ene shei sender id add kore dibo, receiver r mail diye dekhbo ai db te 
+    // ai user ache naki thakle receiver mail diye tar id ber kore boshiye dibo receiverId te
+    sender_email: { type: String, required: true },
+    receiver_email: {type : String, required: true},
+    
+    senderId: { type: Schema.Types.ObjectId, ref: "User" },
+    receiverId: { type: Schema.Types.ObjectId || null, ref: "User" },
+    
     fromAddress: { type: String, required: true },
     toAddress: { type: String, required: true },
     parcelType: { type: String },
+    phone: { type: String, required: true },
 
     weight: { type: Number, required: true },
     deliveryFee: { type: Number, required: true },
@@ -43,7 +46,7 @@ export const percelSchema = new Schema<Ipercel>(
       enum: Object.values(ParcelStatus),
       default: ParcelStatus.Requested,
     },
-    trackingEvents: [statuslogs],
+    statusLog: [statuslogs],
 
     createdAt: { type: Date },
     updatedAt: { type: Date },

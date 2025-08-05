@@ -8,6 +8,7 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log('globalEroor', err);
   const statusCode = 500;
   const message = `Something went wrong ${err.message}`;
   if (err) {

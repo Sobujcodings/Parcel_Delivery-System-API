@@ -3,6 +3,7 @@ import { Server } from "http";
 import mongoose from "mongoose";
 import { app } from "./app";
 import { envVars } from "./config/env";
+import { sendSuperAdmin } from "./utils/sendSuperAdmin";
 
 // type is from http
 let server: Server;
@@ -23,8 +24,12 @@ const startServer = async () => {
   }
 };
 
-// Call the function
-startServer();
+// to use await use async (immidiatlye invoked function expression)
+(async () => {
+  await startServer();
+  await sendSuperAdmin();
+})();
+
 
 // 3 types error handling approach
 // unhandlled rejection error (a promise err due to not using trycatch)
@@ -69,7 +74,6 @@ process.on("SIGTERM", () => {
 });
 
 // test SIGTERM (server nijei cntl+c diye close korle server initialize hobe msg dekhte pabo temne hut kore bondho korleo msg dekhte pabo tokhon gracefully process gula off korbo rather than shutting the server instant without any err)
-
 // It listens for the SIGINT event.
 // When you press Ctrl + C, instead of Node exiting immediately, it runs your callback.
 // ✅ This is where you can:

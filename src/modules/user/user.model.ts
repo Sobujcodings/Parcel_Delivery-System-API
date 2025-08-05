@@ -23,9 +23,10 @@ const userSchema = new Schema<Iuser>(
     role: {
       type: String,
       enum: Object.values(Role),
-      default: Role.SENDER,
+      required: true,
+      // default: Role.SENDER,
     },
-    phone: { type: String},
+    phone: { type: String },
     picture: { type: String },
     adress: { type: String },
     isDeleted: { type: String },

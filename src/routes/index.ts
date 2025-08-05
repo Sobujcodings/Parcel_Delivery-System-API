@@ -18,13 +18,12 @@ const moduleRoutes = [
     route: AuthRouter,
   },
   {
-    path: "/percel",
+    path: "/parcels",
     route: percelRouter,
   },
 ];
 
 moduleRoutes.forEach((route, path) => {
   router.use(route.path, route.route);
-  console.log(`Registering route for path: /api/v1${path}`);
   // router.use("/user", userRoutes)
 });

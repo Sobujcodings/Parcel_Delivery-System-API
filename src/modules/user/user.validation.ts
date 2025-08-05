@@ -7,6 +7,7 @@ export const createUserZodSchema = z.object({
     .min(2, { message: "Name too short minimum 2 character long" })
     .max(50, { message: "Name too long" }),
   email: z.string().email(),
+  role: z.string({ invalid_type_error: "role must be string" }),
   password: z
     .string()
     .min(8)

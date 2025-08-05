@@ -21,15 +21,17 @@ export interface trackingEvents {
 
 export interface Ipercel {
   trackingId?: string;
-  email: string;
   phone: string;
+  
+  sender_email : string,
+  receiver_email : string,
 
   fromAddress: string;
   toAddress: string;
 
   // Ref to User
-  sender: Types.ObjectId;
-  receiver?: Types.ObjectId;
+  senderId: Types.ObjectId;
+  receiverId: Types.ObjectId | null;
 
   parcelType?: string;
   isFragile?: boolean;
@@ -45,7 +47,7 @@ export interface Ipercel {
   isReturned?: boolean;
   isHeld?: boolean;
 
-  trackingEvents: trackingEvents[];
+  statusLog: trackingEvents[];
 
   createdAt?: Date;
   updatedAt?: Date;

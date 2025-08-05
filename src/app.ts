@@ -3,7 +3,6 @@ import cors from "cors";
 import { router } from "./routes";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
-// route matching app.ts > router.ts > userRoute --> controller --> service --> model --> DB
 
 export const app = express();
 app.use(express.json());
