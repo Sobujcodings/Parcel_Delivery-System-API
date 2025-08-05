@@ -16,11 +16,12 @@ router.get("/incoming-parcels", checkAuth(Role.RECEIVER), percelController.getIn
 router.patch("/confirm-parcels/:id", percelController.confirmParcel);
 
 
-// Delivery history refers to all past parcels that were:
+// Delivery history refers to all past parcels that were !!
 // Assigned to the receiver (receiver_id or receiver_email)
 // Completed or finalized — i.e., no longer incoming or active
 // ["Delivered", "Returned", "Cancelled"]
 // jei parcel tar jonno assign kora hoicilo but kono karone delivery/confirm, returned, cancel hoye geche shegula dekhabo same like incoming status is diff
+// jei parcel gular receiver id/receiver email ai token r emai/id r sathe mile shegula shob ene dekhabo shudhu jegula cancel,return,dilevy done hoice
 
 // router.post("/delivery-parcels-history", percelController.createPercel);
 
