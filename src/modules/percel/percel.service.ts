@@ -5,7 +5,9 @@ import { User } from "../user/user.model";
 import { Ipercel, ParcelStatus } from "./percel.interface";
 import { percel } from "./percel.model";
 import httpStatus from "http-status-codes";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
+import { IsActive, Role } from "../user/user.interface";
 
 // sender route
 const createPercel = async (req: Request, payload: Partial<Ipercel>) => {
@@ -20,10 +22,14 @@ const createPercel = async (req: Request, payload: Partial<Ipercel>) => {
       httpStatus.NOT_FOUND,
       "user token is not found, please login first"
     );
-  }
-  const decoded = jwt.decode(token, { complete: true });
-  payload.senderId = (decoded as JwtPayload)?.payload.userId;
+  };
 
+  const decoded = jwt.decode(token, { complete: true }) as JwtPayload;
+  if (decoded.payload.isActive === 'BLOCKED') {
+    throw new AppError(httpStatus.BAD_REQUEST, `Failed, this user is ${decoded.payload.isActive} now`);
+  };
+
+  payload.senderId = (decoded as JwtPayload)?.payload.userId;
   // checking if the sender mail n receiver mail has user not or then send their id with the response here
   const receiver = await User.findOne({ email: payload.receiver_email });
   payload.receiverId = receiver?._id || null;
@@ -53,7 +59,6 @@ const getSinglePercel = async (id: string) => {
 
   return getSingleParcel;
 };
-
 const cancelParcel = async (id: string) => {
   const toCancelParcel = await percel.findById(id);
   // console.log("tocancelParcel", tocancelParcel);
@@ -61,14 +66,14 @@ const cancelParcel = async (id: string) => {
   if (!toCancelParcel) {
     throw new AppError(httpStatus.NOT_FOUND, "Parcel not found for this id");
   }
-  if (toCancelParcel.parcel_status === "Cancelled") {
+  if (
+    toCancelParcel.parcel_status === "Cancelled" ||
+    toCancelParcel.parcel_status === ParcelStatus.Dispatched
+  ) {
     throw new AppError(
       httpStatus.NOT_FOUND,
-      "This Parcel is already Cancelled"
+      `This Parcel is already ${toCancelParcel.parcel_status}`
     );
-  }
-  if (toCancelParcel.parcel_status === ParcelStatus.Dispatched) {
-    throw new AppError(httpStatus.NOT_FOUND, "Parcel not found, Its dispatced");
   }
 
   // otherwise make it cancelled.
@@ -78,7 +83,6 @@ const cancelParcel = async (id: string) => {
   });
   return cancaled;
 };
-
 const getStatusLogPercel = async (id: string) => {
   // console.log("id", id);
   const StatusLogPercel = await percel.findById(id);
@@ -87,6 +91,7 @@ const getStatusLogPercel = async (id: string) => {
   }
   return StatusLogPercel;
 };
+
 
 // receiver routes
 const getIncomingPercel = async (req: Request) => {
@@ -135,7 +140,6 @@ const getIncomingPercel = async (req: Request) => {
     Incoming_Parcels: getParcels,
   };
 };
-
 const confirmParcel = async (id: string) => {
   const toUpdateParcel = await percel.findById(id);
   // console.log("toUpdateParcel", toUpdateParcel);
@@ -149,7 +153,7 @@ const confirmParcel = async (id: string) => {
   ) {
     throw new AppError(
       httpStatus.NOT_FOUND,
-      `This parcel cannot be confirmed because it is currently marked as "${toUpdateParcel.parcel_status}".`
+      `This parcel cannot be confirmed because it is currently marked as "${toUpdateParcel.parcel_status}" now, try again`
     );
   }
 
@@ -161,12 +165,87 @@ const confirmParcel = async (id: string) => {
   });
   return cancaled;
 };
+const deliveryHistory = async (token: string) => {
+  if (!token) {
+    throw new AppError(httpStatus.NOT_FOUND, "Access token not found");
+  }
+  const decodedToken = jwt.decode(token, { complete: true }) as JwtPayload;
+  // console.log("decodedToken", decodedToken);
+  // const userIdOrMail = decodedToken?.payload.userId ? decodedToken?.payload.userId : decodedToken?.payload.email;
+
+  const getDeliveryHistory = await percel.find({
+    receiverId: decodedToken.payload.userId,
+    parcel_status: { $ne: "Requested" },
+  });
+  if (!getDeliveryHistory) {
+    throw new AppError(httpStatus.NOT_FOUND, "No parcels are found");
+  }
+
+  return getDeliveryHistory;
+};
+
+
+// admin logic
+const getAllUsers = async () => {
+  const allUsers = await User.find();
+  return allUsers;
+};
+const getAllParcels = async () => {
+  // get users ref table data also from user table that was assigned while creating parcel
+  const allParcels = await percel
+    .find()
+    .populate("senderId", "name role email phone")
+    .populate("receiverId", "name role email phone");
+
+  return allParcels;
+};
+
+const updateUserRole = async (id: string) => {
+  console.log(id);
+  const toUpdateUserRole = await User.findById(id);
+  // console.log("toUpdateUserRole", toUpdateUserRole);
+
+  if (!toUpdateUserRole) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found for this id");
+  }
+  if (toUpdateUserRole.role === "ADMIN") {
+    throw new AppError(httpStatus.NOT_FOUND, "user already a Admin");
+  }
+
+  // set
+  toUpdateUserRole.role = Role.ADMIN;
+  const updatedUser = await User.findByIdAndUpdate(id, toUpdateUserRole, {
+    new: true,
+  });
+
+  return updatedUser;
+};
+
+const updateUserActiveStatus = async (req: Request) => {
+  console.log("req.body", req.body);
+  const toUpdateUserisActive = await User.findById(req.body._id);
+  console.log("toUpdateUserisActive", toUpdateUserisActive);
+  if (!toUpdateUserisActive) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found for this _id");
+  }
+
+  // set (isactive/inactive/block) --> user jeta chabe sheta kore dibo
+  toUpdateUserisActive.isActive = req.body.isActive;
+  const updatedUser = await User.findByIdAndUpdate(req.body._id, toUpdateUserisActive, {
+    new: true,
+  });
+  return updatedUser;
+};
 
 export const percelService = {
   createPercel,
-  getSinglePercel,
+  deliveryHistory,
   cancelParcel,
   getStatusLogPercel,
   getIncomingPercel,
   confirmParcel,
+  getAllUsers,
+  getAllParcels,
+  updateUserRole,
+  updateUserActiveStatus,
 };

@@ -4,6 +4,7 @@ import { VerifyToken } from "../utils/jwt";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import httpStatus from "http-status-codes";
+import jwt from "jsonwebtoken"
 
 // verify token n roles
 export const checkAuth =
@@ -22,6 +23,17 @@ export const checkAuth =
         accessToken,
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
+
+      // check if the user is BLOCKED OR INACTIVE NOW
+      const decoded = jwt.decode(accessToken, { complete: true }) as JwtPayload;
+      if (
+        decoded.payload.isActive === "BLOCKED"
+      ) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          `Failed, this user is ${decoded.payload.isActive} now`
+        );
+      }
 
       // console.log('verificationToken', verificationToken);
       // console.log('authRoles', authRoles);

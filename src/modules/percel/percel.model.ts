@@ -23,8 +23,8 @@ export const percelSchema = new Schema<Ipercel>(
     sender_email: { type: String, required: true },
     receiver_email: {type : String, required: true},
     
-    senderId: { type: Schema.Types.ObjectId, ref: "User" },
-    receiverId: { type: Schema.Types.ObjectId || null, ref: "User" },
+    senderId: { type: Schema.Types.ObjectId, ref: "User"},
+    receiverId: { type: Schema.Types.ObjectId, ref: "User",  default: null },
     
     fromAddress: { type: String, required: true },
     toAddress: { type: String, required: true },

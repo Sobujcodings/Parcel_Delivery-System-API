@@ -4,34 +4,48 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 const router = Router();
 
-// only senders --> agula shudhu user_role=sender hole korte parbe auth diye user_role check koro, nahole error diba, that you are not a sender or something!
+// only senders
 router.post("/", checkAuth(Role.SENDER), percelController.createPercel);
-// router.get("singledetails/:id", checkAuth(Role.SENDER), percelController.getSinglePercel);
 router.patch("/cancel/:id", checkAuth(Role.SENDER), percelController.cancelParcel);
 router.get("/:id/status-log",checkAuth(Role.SENDER), percelController.getStatusLogPercel);
+// router.get("singledetails/:id", checkAuth(Role.SENDER), percelController.getSinglePercel);
 
 
-// only receiever can perfom this api hit (user role check kro reciever hole korte diba otherwise show error n return)
+// only receiever
 router.get("/incoming-parcels", checkAuth(Role.RECEIVER), percelController.getIncomingPercel);
-router.patch("/confirm-parcels/:id", percelController.confirmParcel);
+router.patch("/confirm-parcels/:id",checkAuth(Role.RECEIVER), percelController.confirmParcel);
+router.get("/delivery-history", checkAuth(Role.RECEIVER), percelController.deliveryHistory);
 
 
-// Delivery history refers to all past parcels that were !!
-// Assigned to the receiver (receiver_id or receiver_email)
-// Completed or finalized — i.e., no longer incoming or active
-// ["Delivered", "Returned", "Cancelled"]
-// jei parcel tar jonno assign kora hoicilo but kono karone delivery/confirm, returned, cancel hoye geche shegula dekhabo same like incoming status is diff
-// jei parcel gular receiver id/receiver email ai token r emai/id r sathe mile shegula shob ene dekhabo shudhu jegula cancel,return,dilevy done hoice
+// Validations & Business Rules (check this after api done)
+// Can a sender cancel a dispatched parcel?
+// Can a receiver mark a parcel as delivered themselves?
+// Can blocked users access features?
+// What validations will you enforce?
+// e.g., user role checks, parcel ownership, delivery status flow
+// Can a receiver mark a parcel as delivered themselves ??
 
-// router.post("/delivery-parcels-history", percelController.createPercel);
 
+// manage parcel(2 API) akhn kora baki ??
+// jei shob parcel gula Requested obosthay ache shegula dekhte pabe admin(drkr nai all parcel thekei korte parbe)
+
+// Cancel deliveries
+// (ADMIN chaile akta parcel k (Delivered = "Delivered" --> shudhu delivered korte parbe ata only receiver korbe)
+//   Approved = "Approved")
+//   Dispatched = "Dispatched",
+//   In_Transit = "In_Transit",
+//   Cancelled = "Cancelled",
+//   Returned = "Returned",
+//   Held = "Held",
+//   Blocked = "Blocked",
 
 
 // only admin can do this (users incluing sernder n reciever)
-// router.post("/view-all-users", percelController.createPercel);
-// router.post("/view-all-percels", percelController.createPercel);
-// router.post("/block-unlock-user", percelController.createPercel);
-// router.post("/block-unlock-parcel", percelController.createPercel);
+router.get("/view-all-users", checkAuth(Role.ADMIN), percelController.getAllUsers);
+router.get("/view-all-parcels",checkAuth(Role.ADMIN), percelController.getAllParcels);
+router.patch("/update-user-role/:id", checkAuth(Role.ADMIN), percelController.updateUserRole);
+router.post("/update-user-active-status", checkAuth(Role.ADMIN), percelController.updateUserActiveStatus);
+router.post("/update-parcel-status", checkAuth(Role.ADMIN), percelController.updateparcelStatus);
 
 
 export const percelRouter = router;

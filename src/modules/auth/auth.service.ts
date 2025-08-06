@@ -30,6 +30,7 @@ export const credentailsLogin = async (payload: Partial<Iuser>) => {
     userId: isUserExist._id,
     email: isUserExist.email,
     role: isUserExist.role,
+    isActive: isUserExist.isActive,
   };
 
   // accessToken assign
