@@ -24,6 +24,7 @@ router.get("/delivery-history", checkAuth(Role.RECEIVER), percelController.deliv
 // What validations will you enforce?
 // e.g., user role checks, parcel ownership, delivery status flow
 // Can a receiver mark a parcel as delivered themselves ??
+// kono parcel blocked/cancel/return hole kintu receiver/sender shetake r udpate korte parbe na sheta just locked thakbe just view
 
 
 // manage parcel(2 API) akhn kora baki ??
@@ -41,6 +42,7 @@ router.get("/delivery-history", checkAuth(Role.RECEIVER), percelController.deliv
 
 
 // only admin can do this (users incluing sernder n reciever)
+// kono parcel blocked/cancel/return hole kintu receiver/sender shetake r udpate korte parbe na sheta just locked thakbe just view
 router.get("/view-all-users", checkAuth(Role.ADMIN), percelController.getAllUsers);
 router.get("/view-all-parcels",checkAuth(Role.ADMIN), percelController.getAllParcels);
 router.patch("/update-user-role/:id", checkAuth(Role.ADMIN), percelController.updateUserRole);

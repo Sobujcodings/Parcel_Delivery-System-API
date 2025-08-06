@@ -224,6 +224,27 @@ const updateUserActiveStatus = async (
   }
 };
 
+const updateparcelStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.body) {
+      throw new AppError(httpStatus.NOT_FOUND, "_id, Parcel status required");
+    };
+    const percel = await percelService.updateparcelStatus(req);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "parcel_status updated Successfully",
+      data: percel,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const percelController = {
   createPercel,
   getSinglePercel,
@@ -236,4 +257,5 @@ export const percelController = {
   getAllParcels,
   updateUserRole,
   updateUserActiveStatus,
+  updateparcelStatus,
 };

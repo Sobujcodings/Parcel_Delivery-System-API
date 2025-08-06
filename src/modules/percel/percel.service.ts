@@ -237,6 +237,21 @@ const updateUserActiveStatus = async (req: Request) => {
   return updatedUser;
 };
 
+const updateparcelStatus = async (req: Request) => {
+  // console.log("req.body", req.body);
+  const toUpdateUserisActive = await percel.findById(req.body._id);
+  // console.log("toUpdateUserisActive", toUpdateUserisActive);
+  if (!toUpdateUserisActive) {
+    throw new AppError(httpStatus.NOT_FOUND, "user not found for this _id");
+  };
+
+  toUpdateUserisActive.parcel_status = req.body.parcel_status;
+  const updatedUser = await percel.findByIdAndUpdate(req.body._id, toUpdateUserisActive, {
+    new: true,
+  });
+  return updatedUser;
+};
+
 export const percelService = {
   createPercel,
   deliveryHistory,
@@ -248,4 +263,5 @@ export const percelService = {
   getAllParcels,
   updateUserRole,
   updateUserActiveStatus,
+  updateparcelStatus,
 };
