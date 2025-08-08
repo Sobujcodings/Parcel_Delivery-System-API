@@ -53,7 +53,7 @@ const cancelParcel = async (
 ) => {
   try {
     const id = req.params.id;
-    const percel = await percelService.cancelParcel(id);
+    const percel = await percelService.cancelParcel(id, req);
     // console.log("percelController", percel);
 
     sendResponse(res, {

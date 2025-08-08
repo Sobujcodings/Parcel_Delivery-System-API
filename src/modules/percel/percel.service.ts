@@ -22,12 +22,15 @@ const createPercel = async (req: Request, payload: Partial<Ipercel>) => {
       httpStatus.NOT_FOUND,
       "user token is not found, please login first"
     );
-  };
+  }
 
   const decoded = jwt.decode(token, { complete: true }) as JwtPayload;
-  if (decoded.payload.isActive === 'BLOCKED') {
-    throw new AppError(httpStatus.BAD_REQUEST, `Failed, this user is ${decoded.payload.isActive} now`);
-  };
+  if (decoded.payload.isActive === "BLOCKED") {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Failed, this user is ${decoded.payload.isActive} now`
+    );
+  }
 
   payload.senderId = (decoded as JwtPayload)?.payload.userId;
   // checking if the sender mail n receiver mail has user not or then send their id with the response here
@@ -59,25 +62,50 @@ const getSinglePercel = async (id: string) => {
 
   return getSingleParcel;
 };
-const cancelParcel = async (id: string) => {
+const cancelParcel = async (id: string, req: Request) => {
   const toCancelParcel = await percel.findById(id);
-  // console.log("tocancelParcel", tocancelParcel);
-
   if (!toCancelParcel) {
     throw new AppError(httpStatus.NOT_FOUND, "Parcel not found for this id");
   }
-  if (
-    toCancelParcel.parcel_status === "Cancelled" ||
-    toCancelParcel.parcel_status === ParcelStatus.Dispatched
-  ) {
+
+  // check if user is Blocked now.
+  const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, "token not found");
+  }
+  console.log("token", token);
+  const decoded = jwt.decode(token, { complete: true }) as JwtPayload;
+  console.log("decoded", decoded);
+  if (decoded.payload.isActive === "BLOCKED") {
     throw new AppError(
-      httpStatus.NOT_FOUND,
-      `This Parcel is already ${toCancelParcel.parcel_status}`
+      httpStatus.BAD_REQUEST,
+      `Failed, this user is ${decoded.payload.isActive} now`
     );
   }
 
-  // otherwise make it cancelled.
+  // check if parcel is not approved/requested.
+  if (
+    toCancelParcel.parcel_status !== ParcelStatus.Approved &&
+    toCancelParcel.parcel_status !== ParcelStatus.Requested
+  ) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      `Cancellation only allowed when status is Requested or Approved. Now parcel status is ${toCancelParcel.parcel_status}`
+    );
+  }
+
+  // else make it cancelled.
   toCancelParcel.parcel_status = ParcelStatus.Cancelled;
+
+  // update the statusLog
+  const newStatusLog = {
+    location: "System",
+    timestamp: new Date(),
+    status: ParcelStatus.Cancelled,
+    note: "Parcel is Cancelled.",
+  };
+  toCancelParcel.statusLog.push(newStatusLog);
+
   const cancaled = await percel.findByIdAndUpdate(id, toCancelParcel, {
     new: true,
   });
@@ -91,7 +119,6 @@ const getStatusLogPercel = async (id: string) => {
   }
   return StatusLogPercel;
 };
-
 
 // receiver routes
 const getIncomingPercel = async (req: Request) => {
@@ -160,6 +187,15 @@ const confirmParcel = async (id: string) => {
   // otherwise make it Delivered to confirm.
   toUpdateParcel.parcel_status = ParcelStatus.Delivered;
 
+  // update the statusLog
+  const newStatusLog = {
+    location: "System",
+    timestamp: new Date(),
+    status: ParcelStatus.Delivered,
+    note: "Parcel is Delivered.",
+  };
+  toUpdateParcel.statusLog.push(newStatusLog);
+
   const cancaled = await percel.findByIdAndUpdate(id, toUpdateParcel, {
     new: true,
   });
@@ -183,7 +219,6 @@ const deliveryHistory = async (token: string) => {
 
   return getDeliveryHistory;
 };
-
 
 // admin logic
 const getAllUsers = async () => {
@@ -231,24 +266,51 @@ const updateUserActiveStatus = async (req: Request) => {
 
   // set (isactive/inactive/block) --> user jeta chabe sheta kore dibo
   toUpdateUserisActive.isActive = req.body.isActive;
-  const updatedUser = await User.findByIdAndUpdate(req.body._id, toUpdateUserisActive, {
-    new: true,
-  });
+  const updatedUser = await User.findByIdAndUpdate(
+    req.body._id,
+    toUpdateUserisActive,
+    {
+      new: true,
+    }
+  );
   return updatedUser;
 };
 
 const updateparcelStatus = async (req: Request) => {
-  // console.log("req.body", req.body);
   const toUpdateUserisActive = await percel.findById(req.body._id);
   // console.log("toUpdateUserisActive", toUpdateUserisActive);
   if (!toUpdateUserisActive) {
     throw new AppError(httpStatus.NOT_FOUND, "user not found for this _id");
-  };
+  }
+  // parcel cancel,return,delivered body te padhale update korte dewa jabe na.
+  if (
+    ["Cancelled", "Returned", "Delivered"].includes(
+      toUpdateUserisActive.parcel_status
+    )
+  ) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      `This parcel cannot be updated coz it is currently marked as "${toUpdateUserisActive.parcel_status}" now, try again`
+    );
+  }
 
   toUpdateUserisActive.parcel_status = req.body.parcel_status;
-  const updatedUser = await percel.findByIdAndUpdate(req.body._id, toUpdateUserisActive, {
-    new: true,
-  });
+  // update the statusLog
+  const newStatusLog = {
+    location: "System",
+    timestamp: new Date(),
+    status: req.body.parcel_status,
+    note: `Parcel is ${req.body.parcel_status}.`,
+  };
+  toUpdateUserisActive.statusLog.push(newStatusLog);
+
+  const updatedUser = await percel.findByIdAndUpdate(
+    req.body._id,
+    toUpdateUserisActive,
+    {
+      new: true,
+    }
+  );
   return updatedUser;
 };
 
