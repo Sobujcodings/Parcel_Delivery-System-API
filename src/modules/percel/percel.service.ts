@@ -64,6 +64,7 @@ const getSinglePercel = async (id: string) => {
 };
 const cancelParcel = async (id: string, req: Request) => {
   const toCancelParcel = await percel.findById(id);
+  console.log('toCancelParcel', toCancelParcel);
   if (!toCancelParcel) {
     throw new AppError(httpStatus.NOT_FOUND, "Parcel not found for this id");
   }
@@ -76,6 +77,15 @@ const cancelParcel = async (id: string, req: Request) => {
   console.log("token", token);
   const decoded = jwt.decode(token, { complete: true }) as JwtPayload;
   console.log("decoded", decoded);
+
+  // check if this parcel is created by this user(from token)
+  if (decoded.payload.userId != toCancelParcel.senderId) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'You are not allowed to cancel this parcel.'
+    );
+  }
+
   if (decoded.payload.isActive === "BLOCKED") {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -317,6 +327,7 @@ const updateparcelStatus = async (req: Request) => {
 export const percelService = {
   createPercel,
   deliveryHistory,
+  getSinglePercel,
   cancelParcel,
   getStatusLogPercel,
   getIncomingPercel,

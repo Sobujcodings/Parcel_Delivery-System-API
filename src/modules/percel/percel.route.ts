@@ -27,9 +27,6 @@ router.post("/update-parcel-status", checkAuth(Role.ADMIN), percelController.upd
 export const percelRouter = router;
 
 
-// Parcel Ownership Validation (TODO!!)
-// A sender can only edit/cancel parcels they created.
-// A receiver can only view parcels where they are the receiver.
 
 // 🧪 Testing & Documentation (check this section finally)
 
