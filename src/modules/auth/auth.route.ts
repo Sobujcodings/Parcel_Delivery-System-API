@@ -8,9 +8,10 @@ router.post("/login", (req, res, next : NextFunction) => {
   AuthController.credentailsLogin(req, res, next);
 });
 
-
 router.post("/refresh-token", (req, res, next : NextFunction) => {
   AuthController.getNewAccessToken(req, res, next);
 });
+
+// logout route (clear cookies for access,refresh token)
 
 export const AuthRouter = router;
