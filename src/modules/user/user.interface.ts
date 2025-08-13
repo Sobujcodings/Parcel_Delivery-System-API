@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 
 // enum e nam dilam ata tar value dilam ata
 export enum Role {
@@ -19,6 +19,7 @@ export enum IsActive {
 }
 
 export interface Iuser {
+  _id? : Types.ObjectId;
   name: string;
   email: string;
   password: string;

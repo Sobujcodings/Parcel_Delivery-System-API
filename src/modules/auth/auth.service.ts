@@ -1,10 +1,12 @@
 import AppError from "../../utils/AppError";
-import { Iuser } from "../user/user.interface";
+import { IsActive, Iuser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import httpStatus from "http-status-codes";
 import bycryptjs from "bcryptjs";
-import { generateToken } from "../../utils/jwt";
+import { generateToken, VerifyToken } from "../../utils/jwt";
 import { envVars } from "../../config/env";
+import { createUserTokens, createNewAccessTokenWithRefreshToken } from '../../utils/userTokens';
+import { JwtPayload } from "jsonwebtoken";
 
 // create user service(business logic & token/email/password verify)
 export const credentailsLogin = async (payload: Partial<Iuser>) => {
@@ -25,27 +27,30 @@ export const credentailsLogin = async (payload: Partial<Iuser>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Password is Incorrect");
   }
 
-  // jwt payload
-  const jwtPayload = {
-    userId: isUserExist._id,
-    email: isUserExist.email,
-    role: isUserExist.role,
-    isActive: isUserExist.isActive,
-  };
+  const userTokens = createUserTokens(isUserExist);
 
-  // accessToken assign
-  // const accessToken = jwt.sign(jwtPayload, "secret", { expiresIn: "1d" });
-  const accessToken = generateToken(
-    jwtPayload,
-    envVars.JWT_ACCESS_SECRET,
-    envVars.JWT_ACCESS_EXPIRES
-  );
+  // remove password
+  const { password: pass, ...rest } = isUserExist.toObject();
 
   return {
-    accessToken,
+    accessToken: userTokens.accessToken,
+    refreshToken: userTokens.refreshToken,
+    user: rest,
+  };
+};
+
+export const getNewAccessToken = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new AppError(httpStatus.BAD_REQUEST, "No refresh token is found from cookies");
+  }
+  const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken);
+
+  return {
+    accessToken: newAccessToken,
   };
 };
 
 export const AuthCredentailService = {
   credentailsLogin,
+  getNewAccessToken,
 };
