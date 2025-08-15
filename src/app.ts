@@ -16,7 +16,7 @@ app.use("/api/v1", router);
 app.get("/", (req: Request, res: Response) => {
   console.log("root route");
   res.status(200).json({
-    message: "Welcome to Tour Management System Beckend",
+    message: "Welcome to Parcel Management System Beckend",
   });
 });
 

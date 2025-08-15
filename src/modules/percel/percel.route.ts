@@ -25,10 +25,3 @@ router.post("/update-user-active-status", checkAuth(Role.ADMIN), percelControlle
 router.post("/update-parcel-status", checkAuth(Role.ADMIN), percelController.updateparcelStatus);
 
 export const percelRouter = router;
-
-
-// TODO:
-// after generate accesstoken set it to the req.user cookies(so that frontend can use it).
-// generate refresh token when access token is expired.
-
-// record video

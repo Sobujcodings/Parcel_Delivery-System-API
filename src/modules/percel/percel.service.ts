@@ -7,7 +7,7 @@ import { percel } from "./percel.model";
 import httpStatus from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
-import { IsActive, Role } from "../user/user.interface";
+import { Role } from "../user/user.interface";
 
 // sender route
 const createPercel = async (req: Request, payload: Partial<Ipercel>) => {

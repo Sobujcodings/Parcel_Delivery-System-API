@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+// import { NextFunction, Request } from "express";
+import { Response } from "express";
 import { envVars } from "../config/env";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 export const globalErrorHandler = (
   err: any,
-  req: Request,
+  // req: Request,
   res: Response,
-  next: NextFunction
+  // next: NextFunction
 ) => {
   console.log('globalEroor', err);
   const statusCode = 500;

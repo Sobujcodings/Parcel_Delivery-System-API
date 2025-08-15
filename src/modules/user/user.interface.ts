@@ -1,4 +1,4 @@
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 
 // enum e nam dilam ata tar value dilam ata
 export enum Role {

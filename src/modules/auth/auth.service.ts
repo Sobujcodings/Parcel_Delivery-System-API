@@ -1,12 +1,9 @@
 import AppError from "../../utils/AppError";
-import { IsActive, Iuser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import httpStatus from "http-status-codes";
 import bycryptjs from "bcryptjs";
-import { generateToken, VerifyToken } from "../../utils/jwt";
-import { envVars } from "../../config/env";
 import { createUserTokens, createNewAccessTokenWithRefreshToken } from '../../utils/userTokens';
-import { JwtPayload } from "jsonwebtoken";
+import { Iuser } from "../user/user.interface";
 
 // create user service(business logic & token/email/password verify)
 export const credentailsLogin = async (payload: Partial<Iuser>) => {
