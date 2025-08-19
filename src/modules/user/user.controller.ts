@@ -5,7 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 
 const createdUser = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('controller', req.body);
+  // console.log('controller', req.body);
   try {
     const users = await UserServices.createUser(req.body);
     

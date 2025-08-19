@@ -8,7 +8,4 @@ const router = Router();
 
 router.post("/register", validationRequest(createUserZodSchema), UserControllers.createdUser);
 
-// shob user k akmatro admin dekhte pabe
-// router.get("/all-users", checkAuth(Role.SENDER), UserControllers.getUser);
-
 export const userRoutes = router;

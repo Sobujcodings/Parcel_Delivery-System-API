@@ -21,7 +21,9 @@ This backend service provides a secure and trackable parcel delivery management 
 ## ⚙️ Setup & Environment Instructions
 
 ### 1️⃣ Prerequisites
+
 Ensure the following are installed:
+
 - [Node.js](https://nodejs.org/) (v18+ recommended)
 - [npm](https://www.npmjs.com/) (v9+ recommended)
 - [MongoDB](https://www.mongodb.com/try/download/community) (local or cloud)
@@ -29,18 +31,22 @@ Ensure the following are installed:
 ---
 
 ### 2️⃣ Clone the Repository
+
 ```bash
 git clone <your-repository-url>
 cd project1_beckend_express_mongoose_typesrcipt
 ```
 
 ### 3️⃣ Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 4️⃣ Environment Variables
+
 Create a `.env` file in the project root:
+
 ```env
 PORT=5000
 DATABASE_URL=mongodb://localhost:27017/parcel_delivery
@@ -49,6 +55,7 @@ JWT_EXPIRES_IN=1d
 ```
 
 ### 5️⃣ Run in Development Mode
+
 ```bash
 npm run dev
 ```
@@ -56,6 +63,7 @@ npm run dev
 ---
 
 ## 📂 Folder Structure
+
 ```
 src
  ├── config          # App & DB configuration
@@ -73,7 +81,31 @@ src
 ---
 
 ## 📡 API Endpoints
+
 Base URL:
+
 ```
 /api/v1
 ```
+
+## 📦 Parcel API Endpoints
+
+### Sender Endpoints
+
+- **POST** `/` → Create a new parcel _(only sender)_
+- **PATCH** `/cancel/:id` → Cancel a parcel _(only sender)_
+- **GET** `/:id/status-log` → Get status log of a parcel _(only sender)_
+
+### Receiver Endpoints
+
+- **GET** `/incoming-parcels` → View all incoming parcels _(only receiver)_
+- **PATCH** `/confirm-parcels/:id` → Confirm a parcel _(only receiver)_
+- **GET** `/delivery-history` → View delivery history _(only receiver)_
+
+### Admin Endpoints
+
+- **GET** `/view-all-users` → View all users _(only admin)_
+- **GET** `/view-all-parcels` → View all parcels _(only admin)_
+- **PATCH** `/update-user-role/:id` → Update user role _(only admin)_
+- **POST** `/update-user-active-status` → Update user active status _(only admin)_
+- **POST** `/update-parcel-status` → Update parcel status _(only admin)_
