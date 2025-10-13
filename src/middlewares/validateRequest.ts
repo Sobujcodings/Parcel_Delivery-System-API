@@ -1,15 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodObject } from "zod";
+import { ZodObject, ZodError } from "zod";
 
-export const validationRequest = (zodSchema : ZodObject) => async (req: Request, res: Response, next: NextFunction) => {
-  try {
-      // req.body same
-      (req as any).body = await zodSchema.parseAsync(req.body);
-      console.log(req.body);
-      // if validation complete(meaning zod validation matches with requested body) go to next to further process here move to user controller and createUser
-      // next() --> to move back to the process where it has been called/used which is user.route
+export const validationRequest =
+  (zodSchema: ZodObject) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // ✅ Parse and validate body safely
+      const validatedBody = await zodSchema.parseAsync(req.body);
+      req.body = validatedBody;
+
       next();
     } catch (error) {
+      if (error instanceof ZodError) {
+        // ✅ Forward formatted Zod error to global handler
+        return next(error);
+      }
+
+      // ✅ Forward any other unexpected errors
       next(error);
     }
-};
+  };
