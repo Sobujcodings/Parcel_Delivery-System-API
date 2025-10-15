@@ -1,22 +1,31 @@
 import { NextFunction, Request, Response } from "express";
 import { sendResponse } from "../../utils/sendResponse";
-import httpStatus from 'http-status-codes';
+import httpStatus from "http-status-codes";
 import { AuthCredentailService } from "./auth.service";
 import AppError from "../../utils/AppError";
 
-const credentailsLogin = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const loginInfo = await  AuthCredentailService.credentailsLogin(req.body);
+const isProduction = process.env.NODE_ENV === "production";
+console.log("isProduction", isProduction);
 
+const credentailsLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const loginInfo = await AuthCredentailService.credentailsLogin(req.body);
     // send refresh token to the response cookies while login
     res.cookie("accessToken", loginInfo.accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: true, // use true in production (with HTTPS)
+      sameSite: isProduction ? "none" : "lax", // important when frontend & backend are on different domains
     });
+
     // send refresh token to the response cookies while login
     res.cookie("refreshToken", loginInfo.refreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: true,
+      sameSite: isProduction ? "none" : "lax",
     });
 
     sendResponse(res, {
@@ -31,21 +40,31 @@ const credentailsLogin = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-const getNewAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+// get new accessToken API.
+const getNewAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // take refreshtoken in cookies from the request that was inserted in cookies while login
     const refreshToken = req.cookies.refreshToken;
-
     if (!refreshToken) {
-      throw new AppError(httpStatus.BAD_REQUEST, "No refresh token found in cookies");
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "No refresh token found in cookies"
+      );
     }
 
-    const tokenInfo = await AuthCredentailService.getNewAccessToken(refreshToken);
+    const tokenInfo = await AuthCredentailService.getNewAccessToken(
+      refreshToken
+    );
 
     // send refresh token to the response cookies while login
     res.cookie("accessToken", tokenInfo.accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: true,
+      sameSite: isProduction ? "none" : "lax",
     });
 
     sendResponse(res, {
@@ -59,8 +78,7 @@ const getNewAccessToken = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-
 export const AuthController = {
-    credentailsLogin,
-    getNewAccessToken,
-}
+  credentailsLogin,
+  getNewAccessToken,
+};

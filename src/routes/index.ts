@@ -3,6 +3,7 @@ import { Router } from "express";
 import { userRoutes } from "../modules/user/user.route";
 import { AuthRouter } from "../modules/auth/auth.route";
 import { percelRouter } from "../modules/percel/percel.route";
+import { userMe } from "../modules/userme/userme.route";
 
 export const router = Router();
 
@@ -20,6 +21,10 @@ const moduleRoutes = [
   {
     path: "/parcels",
     route: percelRouter,
+  },
+  {
+    path: "/user",
+    route: userMe,
   },
 ];
 
