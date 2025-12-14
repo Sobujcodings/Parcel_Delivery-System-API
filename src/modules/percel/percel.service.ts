@@ -16,7 +16,8 @@ const createPercel = async (req: Request, payload: Partial<Ipercel>) => {
   payload.trackingId = trackingId;
 
   // ai req r token theke verify koren/decode kore jei id ber korbo shetai hobe senderId
-  const token = req.headers.authorization;
+  const token = req.cookies.accessToken;
+  // const token = req.headers.authorization;
   if (!token) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -64,13 +65,13 @@ const getSinglePercel = async (id: string) => {
 };
 const cancelParcel = async (id: string, req: Request) => {
   const toCancelParcel = await percel.findById(id);
-  console.log('toCancelParcel', toCancelParcel);
+  console.log("toCancelParcel", toCancelParcel);
   if (!toCancelParcel) {
     throw new AppError(httpStatus.NOT_FOUND, "Parcel not found for this id");
   }
 
   // check if user is Blocked now.
-  const token = req.headers.authorization;
+  const token = req.cookies.accessToken;
   if (!token) {
     throw new AppError(httpStatus.BAD_REQUEST, "token not found");
   }
@@ -82,7 +83,7 @@ const cancelParcel = async (id: string, req: Request) => {
   if (decoded.payload.userId != toCancelParcel.senderId) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      'You are not allowed to cancel this parcel.'
+      "You are not allowed to cancel this parcel."
     );
   }
 
@@ -132,7 +133,7 @@ const getStatusLogPercel = async (id: string) => {
 
 // receiver routes
 const getIncomingPercel = async (req: Request) => {
-  const token = req.headers.authorization;
+  const token = req.cookies.accessToken;
   // console.log("token", token);
 
   if (!token) {

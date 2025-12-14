@@ -4,14 +4,16 @@ import { VerifyToken } from "../utils/jwt";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import httpStatus from "http-status-codes";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 // verify token n roles
 export const checkAuth =
   (...authRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
+    // console.log('req', req);
     try {
-      const accessToken = req.headers.authorization;
+      const accessToken = req.cookies.accessToken;
+      // const accessToken = req.headers.authorization;
       // console.log("accesstoken", accessToken);
       if (!accessToken) {
         throw new AppError(
@@ -26,9 +28,7 @@ export const checkAuth =
 
       // check if the user is BLOCKED OR INACTIVE NOW
       const decoded = jwt.decode(accessToken, { complete: true }) as JwtPayload;
-      if (
-        decoded.payload.isActive === "BLOCKED"
-      ) {
+      if (decoded.payload.isActive === "BLOCKED") {
         throw new AppError(
           httpStatus.BAD_REQUEST,
           `Failed, this user is ${decoded.payload.isActive} now`

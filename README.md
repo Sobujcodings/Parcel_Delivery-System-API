@@ -80,6 +80,12 @@ src
 
 ---
 
+## 📡 To deploy on Vercel
+npx vercel
+vercel --prod
+
+
+
 ## 📡 API Endpoints
 
 Base URL:

@@ -18,14 +18,16 @@ const credentailsLogin = async (
     res.cookie("accessToken", loginInfo.accessToken, {
       httpOnly: true,
       secure: true, // use true in production (with HTTPS)
-      sameSite: isProduction ? "none" : "lax", // important when frontend & backend are on different domains
+      // sameSite: isProduction ? "none" : "lax", // important when frontend & backend are on different domains
+      sameSite: "none", // REQUIRED for cross-origin
     });
 
     // send refresh token to the response cookies while login
     res.cookie("refreshToken", loginInfo.refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: isProduction ? "none" : "lax",
+      // sameSite: isProduction ? "none" : "lax",
+      sameSite: "none",
     });
 
     sendResponse(res, {
@@ -64,7 +66,8 @@ const getNewAccessToken = async (
     res.cookie("accessToken", tokenInfo.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: isProduction ? "none" : "lax",
+      // sameSite: isProduction ? "none" : "lax",
+      sameSite: "none",
     });
 
     sendResponse(res, {
@@ -78,7 +81,41 @@ const getNewAccessToken = async (
   }
 };
 
+// logged out -> clear cookies
+const logout_clearCookies = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // clear accesstoken
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      // sameSite: isProduction ? "none" : "lax",
+      sameSite: "none",
+    });
+    // clear refreshToken
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      // sameSite: isProduction ? "none" : "lax",
+      sameSite: "none",
+    });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Logged out Successfully",
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const AuthController = {
   credentailsLogin,
   getNewAccessToken,
+  logout_clearCookies,
 };

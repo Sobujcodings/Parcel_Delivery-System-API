@@ -135,7 +135,8 @@ const deliveryHistory = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.headers.authorization;
+    const token = req.cookies.accessToken;
+    // const token = req.headers.authorization;
     const percel = await percelService.deliveryHistory(token as string);
     // console.log("percelController", percel);
 
@@ -175,7 +176,7 @@ const getAllParcels = async (
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
-      message: "All users get Successfully",
+      message: "All parcels get Successfully",
       data: percel,
     });
   } catch (error) {
